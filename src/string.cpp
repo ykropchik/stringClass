@@ -8,9 +8,7 @@
  * Constructors
  */
 
-yns::String::String() {
-    String(7);
-};
+yns::String::String() : String(DEFAULT_CLUSTER_SIZE){};
 
 yns::String::String(unsigned int clusterSize) {
     this->clusterSize = clusterSize;
@@ -20,16 +18,16 @@ yns::String::String(unsigned int clusterSize) {
     this->chain->next = nullptr;
 }
 
-yns::String::String(unsigned int clusterSize, char *initStr) {
-
+yns::String::String(unsigned int clusterSize, const char *initStr) : String(clusterSize){
+    *this = initStr;
 }
 
-yns::String::String(unsigned int clusterSize, const std::string &initStr) {
-
+yns::String::String(unsigned int clusterSize, const std::string &initStr) : String(clusterSize){
+    *this = initStr;
 }
 
-yns::String::String(const yns::String &string) {
-
+yns::String::String(const yns::String &initStr) : String(DEFAULT_CLUSTER_SIZE) {
+    *this = initStr;
 }
 
 /**
@@ -59,14 +57,26 @@ bool yns::String::replace(const yns::String &subString, const String &string) {
 
 
 yns::String &yns::String::operator=(const yns::String &rightStr) {
+    if (this == &rightStr) {
+        return *this;
+    }
+
     return *this;
 }
 
-yns::String yns::operator+(const String &leftStr, const yns::String &rightStr) {
+yns::String &yns::String::operator=(const char *rightStr) {
+    return *this;
+}
+
+yns::String &yns::String::operator=(const std::string &rightStr) {
+    return *this;
+}
+
+yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightStr) {
     return yns::String(0);
 }
 
-yns::String yns::operator+(const String &leftStr, const std::string &rightStr) {
+yns::String yns::operator+(const yns::String &leftStr, const std::string &rightStr) {
     return yns::String(0);
 }
 
@@ -78,14 +88,12 @@ char *yns::operator+(char *leftString, const yns::String &rightString) {
     return nullptr;
 }
 
-std::string yns::operator+(std::string leftString, const yns::String &rightString) {
+std::string yns::operator+(const std::string &leftString, const yns::String &rightString) {
     return std::string();
 }
 
 std::ostream &yns::operator<<(std::ostream &os, const yns::String &str) {
     return os;
 }
-
-
 
 

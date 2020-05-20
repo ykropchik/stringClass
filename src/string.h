@@ -3,6 +3,8 @@
 //
 #include "string"
 
+#define DEFAULT_CLUSTER_SIZE 7
+
 namespace yns{
     class String {
     private:
@@ -19,8 +21,8 @@ namespace yns{
 
     public:
         String();
-        String(unsigned int clusterSize);
-        String(unsigned int clusterSize, char *initStr);
+        explicit String(unsigned int clusterSize);
+        String(unsigned int clusterSize, const char *initStr);
         String(unsigned int clusterSize, const std::string &initStr);
         String(const String &string);
         unsigned int getLength();
@@ -29,11 +31,13 @@ namespace yns{
 
 
         String& operator =(const String &rightStr);
+        String& operator =(const char *rightStr);
+        String& operator =(const std::string &rightStr);
         friend String operator +(const String &leftStr, const String &rightStr);
         friend String operator +(const String &leftStr, const std::string &rightStr);
         friend String operator +(const String &leftStr, const char *rightString);
         friend std::ostream& operator <<(std::ostream &os, const String &str);
         friend char* operator +(char *leftString, const String &rightString);
-        friend std::string operator +(std::string leftString, const String &rightString);
+        friend std::string operator +(const std::string &leftString, const String &rightString);
     };
 }
