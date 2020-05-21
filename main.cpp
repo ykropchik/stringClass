@@ -4,7 +4,7 @@
 int main() {
 
     std::string str = "My first string";
-    yns::String myStr = str;
-    std::cout << myStr;
+    yns::String myStr;
+    std::cout << myStr << "\nLength = " << myStr.getLength();
     return 0;
 }

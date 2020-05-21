@@ -57,10 +57,19 @@ void yns::String::addElement() {
  */
 
 unsigned int yns::String::getLength() {
-    return 0;
+    Element *runner = chain;
+    unsigned int counter = 0;
+
+    while (runner != nullptr) {
+        for (int i = 0; (i < clusterSize) && (runner->cluster[i] != '\0'); ++i) {
+            counter++;
+        }
+        runner = runner->next;
+    }
+    return counter;
 }
 
-bool yns::String::find(const yns::String &subString) {
+unsigned int yns::String::find(const yns::String &subString) {
     return false;
 }
 
@@ -143,6 +152,10 @@ yns::String &yns::String::operator=(const std::string &rightStr) {
     return *this;
 }
 
+char yns::String::operator[](int index) {
+    return 0;
+}
+
 yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightStr) {
     return yns::String();
 }
@@ -180,6 +193,3 @@ std::ostream &yns::operator<<(std::ostream &os, const yns::String &str) {
     }
     return os;
 }
-
-
-

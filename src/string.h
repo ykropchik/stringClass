@@ -30,18 +30,21 @@ namespace yns{
         String(unsigned int clusterSize, const std::string &initStr);
 
         unsigned int getLength();
-        bool find(const String &subString);
+        unsigned int find(const String &subString);
         bool replace(const String &subString, const String &string);
 
 
         String &operator =(const String &rightStr);
         String &operator =(const char *rightStr);
         String &operator =(const std::string &rightStr);
+        char operator[](int index);
         friend String operator +(const String &leftStr, const String &rightStr);
         friend String operator +(const String &leftStr, const std::string &rightStr);
         friend String operator +(const String &leftStr, const char *rightString);
         friend std::ostream& operator <<(std::ostream &os, const String &str);
-        friend char* operator +(char *leftString, const String &rightString);
+        friend char *operator +(char *leftString, const String &rightString);
         friend std::string operator +(const std::string &leftString, const String &rightString);
     };
+
+
 }
