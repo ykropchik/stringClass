@@ -40,15 +40,23 @@ yns::String::String(unsigned int clusterSize, const std::string &initStr) : Stri
  */
 
 void yns::String::addElement() {
-    Element *runner = chain;
-    while (runner->next != nullptr) {
-        runner = runner->next;
-    }
+    if (chain == nullptr) {
+        chain = new Element;
+        chain->prev = nullptr;
+        chain->cluster = new char[clusterSize];
+        chain->next = nullptr;
+    } else {
+        Element *runner = chain;
 
-    runner->next = new Element;
-    runner->next->prev = runner;
-    runner->next->next = nullptr;
-    runner->next->cluster = new char[clusterSize];
+        while (runner->next != nullptr) {
+            runner = runner->next;
+        }
+
+        runner->next = new Element;
+        runner->next->prev = runner;
+        runner->next->next = nullptr;
+        runner->next->cluster = new char[clusterSize];
+    }
 }
 
 /**
@@ -87,13 +95,14 @@ yns::String &yns::String::operator=(const yns::String &rightStr) {
 }
 
 yns::String &yns::String::operator=(const char *rightStr) {
+    //TODO: Переделать это случай (yns::String должна становится пустой => нужно делать освобождение памяти)
     if (rightStr[0] == '\0'){
         return *this;
     }
+    //
 
     if (chain == nullptr) {
-        chain = new Element;
-        chain->cluster = new char[clusterSize];
+        this->addElement();
     }
 
     Element *runner = chain;
@@ -120,13 +129,14 @@ yns::String &yns::String::operator=(const char *rightStr) {
 }
 
 yns::String &yns::String::operator=(const std::string &rightStr) {
+    //TODO: Переделать это случай
     if (rightStr[0] == '\0'){
         return *this;
     }
+    //
 
     if (chain == nullptr) {
-        chain = new Element;
-        chain->cluster = new char[clusterSize];
+        this->addElement();
     }
 
     Element *runner = chain;
@@ -153,6 +163,11 @@ yns::String &yns::String::operator=(const std::string &rightStr) {
 }
 
 char yns::String::operator[](int index) {
+    if (chain == nullptr) {
+        return '\0';
+    }
+
+
     return 0;
 }
 

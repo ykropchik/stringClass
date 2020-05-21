@@ -15,6 +15,8 @@ namespace yns{
             Element * next;
         };
 
+        unsigned int length;
+        unsigned int clusterCount;
         unsigned int clusterSize;
         Element *chain;
 
