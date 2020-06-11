@@ -15,8 +15,6 @@ namespace yns{
             Element * next;
         };
 
-        unsigned int length;
-        unsigned int clusterCount;
         unsigned int clusterSize;
         Element *chain;
 
@@ -31,7 +29,9 @@ namespace yns{
         String(unsigned int clusterSize, const char *initStr);
         String(unsigned int clusterSize, const std::string &initStr);
 
-        unsigned int getLength();
+        ~String();
+
+        unsigned int length() const;
         unsigned int find(const String &subString);
         bool replace(const String &subString, const String &string);
 
@@ -39,12 +39,11 @@ namespace yns{
         String &operator =(const String &rightStr);
         String &operator =(const char *rightStr);
         String &operator =(const std::string &rightStr);
-        char operator[](int index);
+        char operator[](unsigned int index) const;
         friend String operator +(const String &leftStr, const String &rightStr);
         friend String operator +(const String &leftStr, const std::string &rightStr);
-        friend String operator +(const String &leftStr, const char *rightString);
+        friend String operator +(const String &leftStr, const char *rightStr);
         friend std::ostream& operator <<(std::ostream &os, const String &str);
-        friend char *operator +(char *leftString, const String &rightString);
         friend std::string operator +(const std::string &leftString, const String &rightString);
     };
 

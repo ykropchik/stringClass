@@ -3,8 +3,10 @@
 
 int main() {
 
-    std::string str = "My first string";
-    yns::String myStr;
-    std::cout << myStr << "\nLength = " << myStr.getLength();
+    yns::String myStr3 = "0123";
+    yns::String myStr4 = "456789";
+
+    yns::String myStr5 = myStr3 + myStr4;
+    std::cout << myStr5;
     return 0;
 }

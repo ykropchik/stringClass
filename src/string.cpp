@@ -36,6 +36,32 @@ yns::String::String(unsigned int clusterSize, const std::string &initStr) : Stri
 }
 
 /**
+ * Destructor
+ */
+
+yns::String::~String() {
+    if (chain == nullptr){
+        return;
+    }
+
+    Element *runner = chain;
+
+    while (runner->next != nullptr) {
+        runner = runner->next;
+    }
+
+    while (runner != chain) {
+        runner = runner->prev;
+        delete[] runner->next->cluster;
+        delete runner->next;
+    }
+
+    delete[] chain->cluster;
+    delete chain;
+    chain = nullptr;
+}
+
+/**
  * Private methods
  */
 
@@ -64,7 +90,7 @@ void yns::String::addElement() {
  *
  */
 
-unsigned int yns::String::getLength() {
+unsigned int yns::String::length() const {
     Element *runner = chain;
     unsigned int counter = 0;
 
@@ -87,19 +113,45 @@ bool yns::String::replace(const yns::String &subString, const String &string) {
 
 
 yns::String &yns::String::operator=(const yns::String &rightStr) {
-    if (this == &rightStr) {
+    this->~String();
+
+    if (rightStr[0] == '\0'){
         return *this;
+    }
+
+    if (chain == nullptr) {
+        this->addElement();
+    }
+
+    Element *runner = chain;
+    unsigned int clusterPointer = 0;
+
+    for (int i = 0; i < rightStr.length(); ++i) {
+        if (clusterPointer == clusterSize) {
+            if (runner->next == nullptr) {
+                this->addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+
+        }
+        runner->cluster[clusterPointer++] = rightStr[i];
+    }
+
+    if (clusterPointer < (clusterSize - 1)) {
+        runner->cluster[++clusterPointer] = '\0';
     }
 
     return *this;
 }
 
 yns::String &yns::String::operator=(const char *rightStr) {
-    //TODO: Переделать это случай (yns::String должна становится пустой => нужно делать освобождение памяти)
+    this->~String();
+
     if (rightStr[0] == '\0'){
         return *this;
     }
-    //
 
     if (chain == nullptr) {
         this->addElement();
@@ -129,11 +181,11 @@ yns::String &yns::String::operator=(const char *rightStr) {
 }
 
 yns::String &yns::String::operator=(const std::string &rightStr) {
-    //TODO: Переделать это случай
-    if (rightStr[0] == '\0'){
+    this->~String();
+
+    if (rightStr.length() == 0){
         return *this;
     }
-    //
 
     if (chain == nullptr) {
         this->addElement();
@@ -156,35 +208,130 @@ yns::String &yns::String::operator=(const std::string &rightStr) {
     }
 
     if (clusterPointer < (clusterSize - 1)) {
-        runner->cluster[++clusterPointer] = '\0';
+        runner->cluster[clusterPointer] = '\0';
     }
 
     return *this;
 }
 
-char yns::String::operator[](int index) {
-    if (chain == nullptr) {
+char yns::String::operator[](unsigned int position) const{
+    unsigned int length = this->length();
+
+    if ((position >= length) || (chain == nullptr)) {
         return '\0';
     }
 
+    Element *runner = chain;
+    unsigned int clusterNumber = (position / this->clusterSize);
 
-    return 0;
+    for (int i = 0; i < clusterNumber; ++i) {
+        runner = runner->next;
+    }
+
+    return runner->cluster[position - (clusterNumber * this->clusterSize)];
 }
 
+
 yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightStr) {
-    return yns::String();
+    String result;
+    result = leftStr;
+
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < (length / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+
+    for (int j = 0; j < rightStr.length(); ++j) {
+        if (clusterPointer == result.clusterSize){
+            if (runner->next == nullptr) {
+                result.addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+        }
+
+        runner->cluster[clusterPointer++] = rightStr[j];
+    }
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
 }
 
 yns::String yns::operator+(const yns::String &leftStr, const std::string &rightStr) {
-    return yns::String();
+    String result;
+    result = leftStr;
+
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < (length / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+
+    for (int j = 0; j < rightStr.length(); ++j) {
+        if (clusterPointer == result.clusterSize){
+            if (runner->next == nullptr) {
+                result.addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+        }
+
+        runner->cluster[clusterPointer++] = rightStr[j];
+    }
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
 }
 
-yns::String yns::operator+(const yns::String &leftStr, const char *rightString) {
-    return yns::String();
-}
+yns::String yns::operator+(const yns::String &leftStr, const char *rightStr) {
+    String result;
+    result = leftStr;
 
-char *yns::operator+(char *leftString, const yns::String &rightString) {
-    return nullptr;
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < (length / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+
+    for (int j = 0; j < rightStr[j] != '\0'; ++j) {
+        if (clusterPointer == result.clusterSize){
+            if (runner->next == nullptr) {
+                result.addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+        }
+
+        runner->cluster[clusterPointer++] = rightStr[j];
+    }
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
 }
 
 std::string yns::operator+(const std::string &leftString, const yns::String &rightString) {
