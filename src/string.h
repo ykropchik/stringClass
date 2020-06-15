@@ -32,19 +32,21 @@ namespace yns{
         ~String();
 
         unsigned int length() const;
-        unsigned int find(const String &subString);
-        bool replace(const String &subString, const String &string);
+        int find(const String subString);
+        bool replace(const String &replaceable, const String &string);
 
 
         String &operator =(const String &rightStr);
         String &operator =(const char *rightStr);
         String &operator =(const std::string &rightStr);
         char operator[](unsigned int index) const;
-        friend String operator +(const String &leftStr, const String &rightStr);
-        friend String operator +(const String &leftStr, const std::string &rightStr);
-        friend String operator +(const String &leftStr, const char *rightStr);
+        char &operator[](unsigned int index);
+        friend yns::String operator +(const String &leftStr, const String &rightStr);
+        friend yns::String operator +(const String &leftStr, const std::string &rightStr);
+        friend yns::String operator +(const std::string &rightStr, const String &leftStr);
+        friend yns::String operator +(const String &leftStr, const char *rightStr);
+        friend yns::String operator +(const char *rightStr, const String &leftStr);
         friend std::ostream& operator <<(std::ostream &os, const String &str);
-        friend std::string operator +(const std::string &leftString, const String &rightString);
     };
 
 

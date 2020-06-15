@@ -103,12 +103,42 @@ unsigned int yns::String::length() const {
     return counter;
 }
 
-unsigned int yns::String::find(const yns::String &subString) {
-    return false;
+int yns::String::find(const yns::String subString) {
+    unsigned int thisLength = this->length();
+    unsigned int subLength = subString.length();
+    int i, j;
+
+    if (subLength > thisLength) {
+        return -1;
+    }
+
+    for (i = 0; i <= (thisLength - subLength); ++i) {
+        for (j = 0; (j < subLength) && ((*this)[i + j] == subString[j]); ++j);
+
+        if (j == subLength) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
-bool yns::String::replace(const yns::String &subString, const String &string) {
-    return false;
+bool yns::String::replace(const yns::String &replaceable, const yns::String &string) {
+    int replacePos = this->find(replaceable);
+
+    if (replacePos == -1) {
+        return false;
+    }
+
+    if (replaceable.length() == string.length()) {
+        for (int i = 0; i < replaceable.length(); ++i) {
+            (*this)[replacePos + i] = string[i];
+        }
+    } else {
+
+    }
+
+    return true;
 }
 
 
@@ -214,27 +244,43 @@ yns::String &yns::String::operator=(const std::string &rightStr) {
     return *this;
 }
 
-char yns::String::operator[](unsigned int position) const{
+char yns::String::operator[](unsigned int index) const{
     unsigned int length = this->length();
 
-    if ((position >= length) || (chain == nullptr)) {
+    if ((index >= length) || (chain == nullptr)) {
         return '\0';
     }
 
     Element *runner = chain;
-    unsigned int clusterNumber = (position / this->clusterSize);
+    unsigned int clusterNumber = (index / this->clusterSize);
 
     for (int i = 0; i < clusterNumber; ++i) {
         runner = runner->next;
     }
 
-    return runner->cluster[position - (clusterNumber * this->clusterSize)];
+    return runner->cluster[index - (clusterNumber * this->clusterSize)];
+}
+
+char &yns::String::operator[](unsigned int index) {
+    unsigned int length = this->length();
+
+    if ((index >= length) || (chain == nullptr)) {
+        return this->chain->cluster[0];
+    }
+
+    Element *runner = chain;
+    unsigned int clusterNumber = (index / this->clusterSize);
+
+    for (int i = 0; i < clusterNumber; ++i) {
+        runner = runner->next;
+    }
+
+    return runner->cluster[index - (clusterNumber * this->clusterSize)];
 }
 
 
 yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightStr) {
-    String result;
-    result = leftStr;
+    String result = leftStr;
 
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
@@ -244,7 +290,9 @@ yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightS
         runner = runner->next;
     }
 
-    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
 
     for (int j = 0; j < rightStr.length(); ++j) {
         if (clusterPointer == result.clusterSize){
@@ -267,8 +315,7 @@ yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightS
 }
 
 yns::String yns::operator+(const yns::String &leftStr, const std::string &rightStr) {
-    String result;
-    result = leftStr;
+    String result = leftStr;
 
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
@@ -300,9 +347,41 @@ yns::String yns::operator+(const yns::String &leftStr, const std::string &rightS
     return result;
 }
 
+yns::String yns::operator +(const std::string &leftStr, const yns::String &rightStr) {
+    String result = rightStr;
+
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < (length / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+
+    for (int j = 0; j < leftStr.length(); ++j) {
+        if (clusterPointer == result.clusterSize){
+            if (runner->next == nullptr) {
+                result.addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+        }
+
+        runner->cluster[clusterPointer++] = leftStr[j];
+    }
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
+}
+
 yns::String yns::operator+(const yns::String &leftStr, const char *rightStr) {
-    String result;
-    result = leftStr;
+    String result = leftStr;
 
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
@@ -334,8 +413,37 @@ yns::String yns::operator+(const yns::String &leftStr, const char *rightStr) {
     return result;
 }
 
-std::string yns::operator+(const std::string &leftString, const yns::String &rightString) {
-    return std::string();
+yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
+    String result = rightStr;
+
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < (length / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+
+    for (int j = 0; j < leftStr[j] != '\0'; ++j) {
+        if (clusterPointer == result.clusterSize){
+            if (runner->next == nullptr) {
+                result.addElement();
+            }
+
+            clusterPointer = 0;
+            runner = runner->next;
+        }
+
+        runner->cluster[clusterPointer++] = leftStr[j];
+    }
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
 }
 
 std::ostream &yns::operator<<(std::ostream &os, const yns::String &str) {
