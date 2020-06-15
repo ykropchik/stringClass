@@ -103,7 +103,7 @@ unsigned int yns::String::length() const {
     return counter;
 }
 
-int yns::String::find(const yns::String subString) {
+int yns::String::find(const yns::String &subString) {
     unsigned int thisLength = this->length();
     unsigned int subLength = subString.length();
     int i, j;
@@ -135,7 +135,22 @@ bool yns::String::replace(const yns::String &replaceable, const yns::String &str
             (*this)[replacePos + i] = string[i];
         }
     } else {
+        String result(this->clusterSize);
 
+        for (int i = 0; i < replacePos; ++i) {
+            result = result + (*this)[i];
+        }
+
+        for (int j = 0; j < string.length(); ++j) {
+            result = result + string[j];
+        }
+
+        for (int k = (int) (replaceable.length() + replacePos); k < this->length(); ++k) {
+            result = result + (*this)[k];
+        }
+
+        this->~String();
+        *this = result;
     }
 
     return true;
@@ -170,7 +185,7 @@ yns::String &yns::String::operator=(const yns::String &rightStr) {
     }
 
     if (clusterPointer < (clusterSize - 1)) {
-        runner->cluster[++clusterPointer] = '\0';
+        runner->cluster[clusterPointer] = '\0';
     }
 
     return *this;
@@ -204,7 +219,7 @@ yns::String &yns::String::operator=(const char *rightStr) {
     }
 
     if (clusterPointer < (clusterSize - 1)) {
-        runner->cluster[++clusterPointer] = '\0';
+        runner->cluster[clusterPointer] = '\0';
     }
 
     return *this;
@@ -280,13 +295,20 @@ char &yns::String::operator[](unsigned int index) {
 
 
 yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightStr) {
-    String result = leftStr;
+    if (leftStr[0] == '\0') {
+        return rightStr;
+    }
 
+    if (rightStr[0] == '\0') {
+        return leftStr;
+    }
+
+    String result = leftStr;
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
     String::Element *runner = result.chain;
 
-    for (int i = 0; i < (length / result.clusterSize); ++i) {
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
         runner = runner->next;
     }
 
@@ -315,17 +337,26 @@ yns::String yns::operator+(const yns::String &leftStr, const yns::String &rightS
 }
 
 yns::String yns::operator+(const yns::String &leftStr, const std::string &rightStr) {
-    String result = leftStr;
+    if (leftStr[0] == '\0') {
+        return String(rightStr);
+    }
 
+    if (rightStr[0] == '\0') {
+        return leftStr;
+    }
+
+    String result = leftStr;
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
     String::Element *runner = result.chain;
 
-    for (int i = 0; i < (length / result.clusterSize); ++i) {
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
         runner = runner->next;
     }
 
-    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
 
     for (int j = 0; j < rightStr.length(); ++j) {
         if (clusterPointer == result.clusterSize){
@@ -348,17 +379,26 @@ yns::String yns::operator+(const yns::String &leftStr, const std::string &rightS
 }
 
 yns::String yns::operator +(const std::string &leftStr, const yns::String &rightStr) {
-    String result = rightStr;
+    if (leftStr[0] == '\0') {
+        return rightStr;
+    }
 
+    if (rightStr[0] == '\0') {
+        return String(leftStr);
+    }
+
+    String result = leftStr;
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
     String::Element *runner = result.chain;
 
-    for (int i = 0; i < (length / result.clusterSize); ++i) {
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
         runner = runner->next;
     }
 
-    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
 
     for (int j = 0; j < leftStr.length(); ++j) {
         if (clusterPointer == result.clusterSize){
@@ -381,17 +421,26 @@ yns::String yns::operator +(const std::string &leftStr, const yns::String &right
 }
 
 yns::String yns::operator+(const yns::String &leftStr, const char *rightStr) {
-    String result = leftStr;
+    if (leftStr[0] == '\0') {
+        return String(rightStr);
+    }
 
+    if (rightStr[0] == '\0') {
+        return leftStr;
+    }
+
+    String result = leftStr;
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
     String::Element *runner = result.chain;
 
-    for (int i = 0; i < (length / result.clusterSize); ++i) {
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
         runner = runner->next;
     }
 
-    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
 
     for (int j = 0; j < rightStr[j] != '\0'; ++j) {
         if (clusterPointer == result.clusterSize){
@@ -413,18 +462,68 @@ yns::String yns::operator+(const yns::String &leftStr, const char *rightStr) {
     return result;
 }
 
-yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
-    String result = rightStr;
+yns::String yns::operator+(const yns::String &leftStr, const char &rightStr) {
+    if (leftStr[0] == '\0') {
+        return String(new char[2] {rightStr, '\0'});
+    }
 
+    if (rightStr == '\0') {
+        return leftStr;
+    }
+
+    String result = leftStr;
+    unsigned int length = result.length();
+    unsigned int clusterPointer = 0;
+
+    String::Element *runner = result.chain;
+
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
+        runner = runner->next;
+    }
+
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
+
+    if (clusterPointer == result.clusterSize){
+        if (runner->next == nullptr) {
+            result.addElement();
+        }
+
+        clusterPointer = 0;
+        runner = runner->next;
+    }
+
+    runner->cluster[clusterPointer++] = rightStr;
+
+    if (clusterPointer < (result.clusterSize - 1)) {
+        runner->cluster[clusterPointer] = '\0';
+    }
+
+    return result;
+}
+
+yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
+    if (leftStr[0] == '\0') {
+        return rightStr;
+    }
+
+    if (rightStr[0] == '\0') {
+        return String(leftStr);
+    }
+
+    String result = leftStr;
     unsigned int length = result.length();
     unsigned int clusterPointer = 0;
     String::Element *runner = result.chain;
 
-    for (int i = 0; i < (length / result.clusterSize); ++i) {
+    for (int i = 0; i < ((length - 1) / result.clusterSize); ++i) {
         runner = runner->next;
     }
 
-    while ((runner->cluster[clusterPointer++] != '\0') || (clusterPointer != result.clusterSize));
+    while ((runner->cluster[clusterPointer] != '\0') && (clusterPointer != result.clusterSize)) {
+        clusterPointer++;
+    }
 
     for (int j = 0; j < leftStr[j] != '\0'; ++j) {
         if (clusterPointer == result.clusterSize){

@@ -32,7 +32,7 @@ namespace yns{
         ~String();
 
         unsigned int length() const;
-        int find(const String subString);
+        int find(const String &subString);
         bool replace(const String &replaceable, const String &string);
 
 
@@ -45,6 +45,7 @@ namespace yns{
         friend yns::String operator +(const String &leftStr, const std::string &rightStr);
         friend yns::String operator +(const std::string &rightStr, const String &leftStr);
         friend yns::String operator +(const String &leftStr, const char *rightStr);
+        friend yns::String operator +(const String &leftStr, const char &rightStr);
         friend yns::String operator +(const char *rightStr, const String &leftStr);
         friend std::ostream& operator <<(std::ostream &os, const String &str);
     };

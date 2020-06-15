@@ -2,13 +2,10 @@
 #include "src/string.h"
 
 int main() {
-
-    yns::String myStr3 = "123456";
-    std::cout << myStr3 << std::endl;
-    yns::String replace = "123";
-    yns::String myStr4 = "987";
-
-    //myStr3.replace(replace, myStr4);
-    std::cout << myStr3.find("34");
+    yns::String myStr1 = "123456";
+    yns::String myStr2 = "123";
+    yns::String myStr3 = "9";
+    myStr1.replace(myStr2, myStr3);
+    std::cout << myStr1;
     return 0;
 }
