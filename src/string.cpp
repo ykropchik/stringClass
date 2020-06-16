@@ -130,27 +130,31 @@ bool yns::String::replace(const yns::String &replaceable, const yns::String &str
         return false;
     }
 
-    if (replaceable.length() == string.length()) {
-        for (int i = 0; i < replaceable.length(); ++i) {
-            (*this)[replacePos + i] = string[i];
-        }
-    } else {
-        String result(this->clusterSize);
+    while (replacePos != -1) {
+        if (replaceable.length() == string.length()) {
+            for (int i = 0; i < replaceable.length(); ++i) {
+                (*this)[replacePos + i] = string[i];
+            }
+        } else {
+            String result(this->clusterSize);
 
-        for (int i = 0; i < replacePos; ++i) {
-            result = result + (*this)[i];
+            for (int i = 0; i < replacePos; ++i) {
+                result = result + (*this)[i];
+            }
+
+            for (int j = 0; j < string.length(); ++j) {
+                result = result + string[j];
+            }
+
+            for (int k = (int) (replaceable.length() + replacePos); k < this->length(); ++k) {
+                result = result + (*this)[k];
+            }
+
+            this->~String();
+            *this = result;
         }
 
-        for (int j = 0; j < string.length(); ++j) {
-            result = result + string[j];
-        }
-
-        for (int k = (int) (replaceable.length() + replacePos); k < this->length(); ++k) {
-            result = result + (*this)[k];
-        }
-
-        this->~String();
-        *this = result;
+        replacePos = this->find(replaceable);
     }
 
     return true;
@@ -184,7 +188,7 @@ yns::String &yns::String::operator=(const yns::String &rightStr) {
         runner->cluster[clusterPointer++] = rightStr[i];
     }
 
-    if (clusterPointer < (clusterSize - 1)) {
+    if (clusterPointer < clusterSize) {
         runner->cluster[clusterPointer] = '\0';
     }
 
@@ -218,7 +222,7 @@ yns::String &yns::String::operator=(const char *rightStr) {
         runner->cluster[clusterPointer++] = rightStr[i];
     }
 
-    if (clusterPointer < (clusterSize - 1)) {
+    if (clusterPointer < clusterSize) {
         runner->cluster[clusterPointer] = '\0';
     }
 
@@ -252,7 +256,7 @@ yns::String &yns::String::operator=(const std::string &rightStr) {
         runner->cluster[clusterPointer++] = rightStr[i];
     }
 
-    if (clusterPointer < (clusterSize - 1)) {
+    if (clusterPointer < clusterSize) {
         runner->cluster[clusterPointer] = '\0';
     }
 
@@ -545,15 +549,15 @@ yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
     return result;
 }
 
-std::ostream &yns::operator<<(std::ostream &os, const yns::String &str) {
-    if (str.chain == nullptr) {
+std::ostream &yns::operator<<(std::ostream &os, const yns::String &string) {
+    if (string.chain == nullptr) {
         return os;
     }
 
-    String::Element *runner = str.chain;
+    String::Element *runner = string.chain;
 
     while (runner != nullptr) {
-        for (int i = 0; (runner->cluster[i] != '\0') && (i < str.clusterSize); ++i) {
+        for (int i = 0; (runner->cluster[i] != '\0') && (i < string.clusterSize); ++i) {
             char temp = runner->cluster[i];
             os << temp;
         }
