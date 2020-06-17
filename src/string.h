@@ -32,7 +32,7 @@ namespace yns{
         ~String();
 
         unsigned int length() const;
-        int find(const String &subString);
+        int find(const String &subString, unsigned int position);
         bool replace(const String &replaceable, const String &string);
 
 

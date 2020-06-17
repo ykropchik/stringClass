@@ -103,7 +103,11 @@ unsigned int yns::String::length() const {
     return counter;
 }
 
-int yns::String::find(const yns::String &subString) {
+int yns::String::find(const yns::String &subString, unsigned int position) {
+    if (position > (this->length() - subString.length())) {
+        return -1;
+    }
+
     unsigned int thisLength = this->length();
     unsigned int subLength = subString.length();
     int i, j;
@@ -112,7 +116,7 @@ int yns::String::find(const yns::String &subString) {
         return -1;
     }
 
-    for (i = 0; i <= (thisLength - subLength); ++i) {
+    for (i = position; i <= (thisLength - subLength); ++i) {
         for (j = 0; (j < subLength) && ((*this)[i + j] == subString[j]); ++j);
 
         if (j == subLength) {
@@ -124,7 +128,7 @@ int yns::String::find(const yns::String &subString) {
 }
 
 bool yns::String::replace(const yns::String &replaceable, const yns::String &string) {
-    int replacePos = this->find(replaceable);
+    int replacePos = this->find(replaceable, 0);
 
     if (replacePos == -1) {
         return false;
@@ -154,7 +158,7 @@ bool yns::String::replace(const yns::String &replaceable, const yns::String &str
             *this = result;
         }
 
-        replacePos = this->find(replaceable);
+        replacePos = this->find(replaceable, (replacePos + string.length()));
     }
 
     return true;
