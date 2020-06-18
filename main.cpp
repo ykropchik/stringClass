@@ -28,12 +28,20 @@ int main() {
         std::cout << myStr1;
     }*/
 
-    {
+    /*{
         yns::String myStr1 = "aaa";
         yns::String myStr2 = "a";
         yns::String myStr3 = "aaa";
         myStr1.replace(myStr2, myStr3);
         std::cout << myStr1;
+    }*/
+    {
+        yns::String myStr1(5,"mama mila ramy");
+        yns::String myStr2(2,"a m");
+        yns::String myStr3 = "";
+        myStr1.replace(myStr1, myStr3);
+        std::cout << myStr1<<std::endl;
     }
+
     return 0;
 }

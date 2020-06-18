@@ -104,6 +104,10 @@ unsigned int yns::String::length() const {
 }
 
 int yns::String::find(const yns::String &subString, unsigned int position) {
+    if (this->length() == 0) {
+        return -1;
+    }
+
     if (position > (this->length() - subString.length())) {
         return -1;
     }
