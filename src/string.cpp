@@ -537,7 +537,7 @@ yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
         clusterPointer++;
     }
 
-    for (int j = 0; j < leftStr[j] != '\0'; ++j) {
+    for (int j = 0; j < rightStr[j] != '\0'; ++j) {
         if (clusterPointer == result.clusterSize){
             if (runner->next == nullptr) {
                 result.addElement();
@@ -547,7 +547,7 @@ yns::String yns::operator +(const char *leftStr, const yns::String &rightStr) {
             runner = runner->next;
         }
 
-        runner->cluster[clusterPointer++] = leftStr[j];
+        runner->cluster[clusterPointer++] = rightStr[j];
     }
 
     if (clusterPointer < (result.clusterSize - 1)) {
